@@ -29,7 +29,7 @@ public class PersonController {
         return new ResponseEntity<>(personService.updatePerson(id, personDTO), HttpStatus.OK);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePerson(@PathVariable Long id){
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();

@@ -1,9 +1,6 @@
 package org.example.infsyslab1.dto;
 
 import lombok.Data;
-import org.example.infsyslab1.model.Coordinates;
-import org.example.infsyslab1.model.Location;
-import org.example.infsyslab1.model.User;
 import org.example.infsyslab1.model.enums.Color;
 import org.example.infsyslab1.model.enums.Country;
 
@@ -18,9 +15,10 @@ public class PersonDTO {
     private LocalDate birthday;
     private Color eyeColor;
     private Color hairColor;
-    private Location location;
-    private Coordinates coordinates;
-    private User user;
+    private LocationDTO location;
+    private CoordinatesDTO coordinates;
+    private UserDTO user;
     private Integer height;
     private Country nationality;
 }
+
