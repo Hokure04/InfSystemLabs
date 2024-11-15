@@ -2,6 +2,7 @@ package org.example.infsyslab1.service;
 
 import org.example.infsyslab1.dto.UserDTO;
 import org.example.infsyslab1.model.User;
+import org.example.infsyslab1.model.enums.Role;
 import org.example.infsyslab1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,6 +58,26 @@ public class UserService {
         userDTO.setUsername(user.getUsername());
         userDTO.setRole(user.getRole());
         return userDTO;
+    }
+
+    public User authenticate(String username, String password){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User nit found"));
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            throw new RuntimeException("Invalid password");
+        }
+        return user;
+    }
+
+    public User register(String username, String password){
+        if(userRepository.existsByUsername(username)){
+            throw new RuntimeException("Username already taken");
+        }
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(Role.USER);
+        return userRepository.save(user);
     }
 
 }
