@@ -12,6 +12,7 @@ import org.example.infsyslab1.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,8 +70,21 @@ public class PersonService {
         personRepository.deleteById(id);
     }
 
-    public List<PersonDTO> getAllPersons(){
-        return personRepository.findAll().stream()
+    public List<PersonDTO> getAllPersons(String filter, String sortBy){
+        List<Person> persons = personRepository.findAll();
+        if(filter != null && !filter.isEmpty()){
+            persons = persons.stream()
+                    .filter(person -> person.getName().equalsIgnoreCase(filter))
+                    .collect(Collectors.toList());
+        }
+        if(sortBy != null && !sortBy.isEmpty()){
+            persons.sort(Comparator.comparing(person -> switch (sortBy.toLowerCase()) {
+                case "name" -> person.getName();
+                case "height" -> person.getHeight().toString();
+                default -> person.getName();
+            }));
+        }
+        return persons.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -79,6 +93,36 @@ public class PersonService {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Person not found"));
         return mapToDTO(person);
+    }
+
+    public int calculateHeightSum(){
+        return personRepository.findAll().stream()
+                .mapToInt(Person::getHeight)
+                .sum();
+    }
+
+    public List<PersonDTO> getPersonByNamePrefix(String prefix){
+        return personRepository.findAll().stream()
+                .filter(person -> person.getName().startsWith(prefix))
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<Integer> getUniqueHeights(){
+        return personRepository.findAll().stream()
+                .map(Person::getHeight)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public double getHairPercentage(String hairColor){
+        long total = personRepository.count();
+        if(total == 0) return 0;
+        long matching = personRepository.findAll().stream()
+                .filter(person -> person.getHairColor() != null && person.getHairColor().name().equalsIgnoreCase(hairColor))
+                .count();
+
+        return (double) matching/total *100;
     }
 
     private Person mapToEntity(PersonDTO personDTO) {

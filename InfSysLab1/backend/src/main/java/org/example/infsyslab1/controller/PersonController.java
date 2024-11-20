@@ -36,12 +36,34 @@ public class PersonController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PersonDTO>> getAllPersons(){
-        return new ResponseEntity<>(personService.getAllPersons(), HttpStatus.OK);
+    public ResponseEntity<List<PersonDTO>> getAllPersons(
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String sortBy
+    ){
+        return new ResponseEntity<>(personService.getAllPersons(filter, sortBy), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PersonDTO> getPersonById(@PathVariable Long id){
         return new ResponseEntity<>(personService.getPersonById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/sum-height")
+    public ResponseEntity<Integer> calculateHeightSum(){
+        return new ResponseEntity<>(personService.calculateHeightSum(), HttpStatus.OK);
+    }
+
+    @GetMapping("/by-name-prefix")
+    public ResponseEntity<List<PersonDTO>> getPersonsByNamePrefix(@RequestParam String prefix){
+        return new ResponseEntity<>(personService.getPersonByNamePrefix(prefix), HttpStatus.OK);
+    }
+    @GetMapping("unique-heights")
+    public ResponseEntity<List<Integer>> getUniqueHeights(){
+        return new ResponseEntity<>(personService.getUniqueHeights(), HttpStatus.OK);
+    }
+
+    @GetMapping("/hair-color-percentage")
+    public  ResponseEntity<Double> getHairColorPercentage(@RequestParam String hairColor){
+        return new ResponseEntity<>(personService.getHairPercentage(hairColor), HttpStatus.OK);
     }
 }

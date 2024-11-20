@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
@@ -17,30 +19,25 @@ public class AuthController {
     @Autowired
     private JWTTokenUtil jwtTokenUtil;
 
-    @GetMapping("/login")
-    public String loginPage(){
-        return "login";
-    }
-
-    @GetMapping("register")
-    public String registerPage(){
-        return "register";
-    }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password){
-        try{
+    public ResponseEntity<String> login(@RequestBody Map<String, String> params) {
+        String username = params.get("username");
+        String password = params.get("password");
+
+        try {
             User user = userService.authenticate(username, password);
             String token = jwtTokenUtil.generateToken(user.getUsername());
             return ResponseEntity.ok(token);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
-
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestParam String username, @RequestParam String password){
+    public ResponseEntity<String> register(@RequestBody Map<String, String> params){
+        String username = params.get("username");
+        String password = params.get("password");
         try{
             User user = userService.register(username, password);
             String token = jwtTokenUtil.generateToken(user.getUsername());

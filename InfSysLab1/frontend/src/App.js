@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import { VideoList } from "./components/VideoList";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -10,8 +10,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />}/>
         <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/videos" element={<VideoList />} /> 
+        <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} /> 
       </Routes>
     </Router>
   );
