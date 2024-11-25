@@ -34,8 +34,10 @@ public class UserService {
                 .toList();
     }
 
-    public Optional<UserDTO> getUserById(Long id){
-        return userRepository.findById(id).map(this::mapToDTO);
+    public UserDTO getUserById(Long id){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return mapToDTO(user);
     }
 
     public UserDTO updateUser(Long id, UserDTO userDTO){

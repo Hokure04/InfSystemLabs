@@ -10,40 +10,46 @@ import java.util.Date;
 public class JWTTokenUtil {
 
     private static final String SECRET_KEY = "ajfkheushflkjrjhtioerhkjgrtjjjjhjigfujylhojkdvjnbherdbfjisrhitohorthgjdfhnc";
-    private static final long EXPIRATION_TIME = 86400000; //24 h
+    private static final long EXPIRATION_TIME = 86400000; // 24 hours
 
-    public String generateToken(String username){
+    public String generateToken(String username) {
         return Jwts.builder()
-                .claim("sub", username)
+                .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, getSigningKey())
                 .compact();
-
     }
 
-    public String getUsernameFromToken(String token){
-        try{
-            JwtParser jwtParser = Jwts.parserBuilder()
+    public String getUsernameFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
-                    .build();
-
-            Claims claims = jwtParser.parseClaimsJws(token).getBody();
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
             return claims.getSubject();
-        } catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             throw new RuntimeException("JWT token has expired", e);
-        }catch (Exception e){
-            throw new RuntimeException("Invalid JWT token, e");
+        } catch (SignatureException e) {
+            throw new RuntimeException("JWT signature validation failed", e);
+        } catch (MalformedJwtException e) {
+            throw new RuntimeException("JWT token is malformed", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid JWT token", e);
         }
-
     }
 
-    public boolean validateToken(String token, String username){
-        String tokenUsername = getUsernameFromToken(token);
-        return (username.equals(tokenUsername) && !isTokenExpired(token));
+    public boolean validateToken(String token) {
+        try {
+            String tokenUsername = getUsernameFromToken(token);
+            return !isTokenExpired(token) && tokenUsername != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    private boolean isTokenExpired(String token){
+    private boolean isTokenExpired(String token) {
         Date expiration = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -53,15 +59,8 @@ public class JWTTokenUtil {
         return expiration.before(new Date());
     }
 
-    public Claims getClaimsFromToken(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    private byte[] getSigningKey(){
+    private byte[] getSigningKey() {
         return SECRET_KEY.getBytes(StandardCharsets.UTF_8);
     }
 }
+

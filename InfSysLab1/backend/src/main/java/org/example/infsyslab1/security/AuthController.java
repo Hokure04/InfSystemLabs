@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -21,18 +22,25 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> params) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> params) {
         String username = params.get("username");
         String password = params.get("password");
 
         try {
             User user = userService.authenticate(username, password);
             String token = jwtTokenUtil.generateToken(user.getUsername());
-            return ResponseEntity.ok(token);
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("id", user.getId());
+            response.put("username", user.getUsername());
+            response.put("role", user.getRole().name());
+
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid username or password"));
         }
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody Map<String, String> params){

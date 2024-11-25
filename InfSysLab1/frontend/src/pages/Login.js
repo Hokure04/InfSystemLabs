@@ -7,7 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLegion = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (username && password) {
       try {
@@ -15,10 +15,25 @@ export default function Login() {
           username,
           password,
         });
-        
-        // Сохраняем токен в localStorage
-        localStorage.setItem("token", response.data.token);
-        navigate("/home");
+  
+        console.log("Login response:", response.data);
+  
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
+          console.log("Token saved in localStorage:", localStorage.getItem("token"));
+          
+          const userData = {
+            id: response.data.id,
+            username: response.data.username,
+            role: response.data.role,
+          };
+          localStorage.setItem("user", JSON.stringify(userData));
+          console.log("User saved in localStorage:", userData);
+  
+          navigate("/home");
+        } else {
+          alert("No token received");
+        }
       } catch (error) {
         console.error("Login failed", error);
         alert("Invalid credentials");
@@ -29,7 +44,7 @@ export default function Login() {
   return (
     <div>
       <h1>Login page</h1>
-      <form onSubmit={handleLegion}>
+      <form onSubmit={handleLogin}>
         <label>
           Username:
           <input

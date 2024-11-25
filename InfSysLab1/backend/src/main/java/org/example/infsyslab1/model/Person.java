@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.infsyslab1.model.enums.Color;
 import org.example.infsyslab1.model.enums.Country;
+import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,7 +55,7 @@ public class Person {
     @Enumerated(EnumType.STRING)
     private Country nationality;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     private User user;
 

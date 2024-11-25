@@ -9,6 +9,7 @@ import org.example.infsyslab1.model.Location;
 import org.example.infsyslab1.model.Person;
 import org.example.infsyslab1.model.User;
 import org.example.infsyslab1.repository.PersonRepository;
+import org.example.infsyslab1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +20,26 @@ import java.util.stream.Collectors;
 @Service
 public class PersonService {
     private final PersonRepository personRepository;
+    private final UserRepository userRepository;
+
 
     @Autowired
-    public PersonService(PersonRepository personRepository){
+    public PersonService(PersonRepository personRepository, UserRepository userRepository){
         this.personRepository = personRepository;
+        this.userRepository = userRepository;
     }
 
-    public PersonDTO createPerson(PersonDTO personDTO){
+    public PersonDTO createPerson(PersonDTO personDTO) {
         Person person = mapToEntity(personDTO);
+        if (personDTO.getUser() != null && personDTO.getUser().getId() != null) {
+            User user = userRepository.findById(personDTO.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            person.setUser(user);
+        }
         person = personRepository.save(person);
         return mapToDTO(person);
     }
+
 
     public PersonDTO updatePerson(Long id, PersonDTO personDTO){
         Person person = personRepository.findById(id)
