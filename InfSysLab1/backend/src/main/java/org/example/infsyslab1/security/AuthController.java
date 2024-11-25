@@ -43,19 +43,24 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody Map<String, String> params){
+    public ResponseEntity<Map<String, Object>> register(@RequestBody Map<String, String> params){
         String username = params.get("username");
         String password = params.get("password");
         try{
             User user = userService.register(username, password);
             String token = jwtTokenUtil.generateToken(user.getUsername());
-            return ResponseEntity.ok(token);
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("id", user.getId());
+            response.put("username", user.getUsername());
+            response.put("role", user.getRole().name());
+            return ResponseEntity.ok(response);
         }catch (RuntimeException e) {
             e.printStackTrace();
             if(e.getMessage().contains("Username already taken")){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already taken");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error","Username already taken"));
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while registration");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error while registration"));
         }
 
     }

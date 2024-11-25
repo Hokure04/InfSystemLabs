@@ -42,31 +42,39 @@ export default function Login() {
   };
 
   return (
-    <div>
-      <h1>Login page</h1>
-      <form onSubmit={handleLogin}>
-        <label>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Login page</h1>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+        <label className="block text-sm font-medium text-gray-700">
           Username:
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </label>
+        </div>
         <br />
-        <label>
+        <div>
+        <label className="block text-sm font-medium text-gray-700">
           Password:
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </label>
+        </div>
         <br />
-        <button type="submit">Login</button>
+        <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Login</button>
       </form>
+    </div>
     </div>
   );
 }

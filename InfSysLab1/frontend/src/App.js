@@ -6,7 +6,8 @@ import Register from "./pages/Register";
 
 function App() {
   return (
-    <Router>
+    <div className="min-h-screen bg-gray-50">
+      <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />}/>
         <Route path="/login" element={<Login />} />
@@ -14,6 +15,7 @@ function App() {
         <Route path="/home" element={<Home />} /> 
       </Routes>
     </Router>
+    </div>
   );
 }
 
