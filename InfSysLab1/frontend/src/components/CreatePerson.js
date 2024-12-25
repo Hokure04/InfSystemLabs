@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import API from "../api";
 
-export default function CreatePerson() {
+export default function CreatePerson({ onClose }) {
     const [formData, setFormData] = useState({
         name: "",
         height: "",
@@ -59,6 +59,7 @@ export default function CreatePerson() {
     
             setSuccessMessage("Person created successfully!");
             setErrorMessage("");
+            if (onClose) onClose();
             console.log("Response:", response.data);
         } catch (error) {
             console.error("Error creating person:", error);
