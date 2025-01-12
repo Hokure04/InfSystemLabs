@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -22,8 +22,14 @@ public class UserService {
     public UserDTO createUser(UserDTO userDTO){
         User user = new User();
         user.setUsername(userDTO.getUsername());
-        user.setPassword(userDTO.getPassword());
-        user.setRole(userDTO.getRole());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+        if (userRepository.count() == 0) {
+            user.setRole(Role.ADMIN);
+        } else {
+            user.setRole(Role.USER);
+        }
+
         user = userRepository.save(user);
         return mapToDTO(user);
     }
@@ -44,7 +50,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setUsername(userDTO.getUsername());
-        user.setPassword(userDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole(userDTO.getRole());
         user = userRepository.save(user);
         return mapToDTO(user);
@@ -56,7 +62,7 @@ public class UserService {
 
     private UserDTO mapToDTO(User user){
         UserDTO userDTO = new UserDTO();
-        userDTO.setId(userDTO.getId());
+        userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setRole(user.getRole());
         return userDTO;
@@ -71,15 +77,50 @@ public class UserService {
         return user;
     }
 
-    public User register(String username, String password){
-        if(userRepository.existsByUsername(username)){
+    public User register(String username, String password) {
+        if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already taken");
         }
+        boolean adminExists = userRepository.findAll().stream().anyMatch(user -> user.getRole() == Role.ADMIN);
+
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
-        user.setRole(Role.USER);
+        user.setRole(adminExists ? Role.USER : Role.ADMIN);
         return userRepository.save(user);
+    }
+
+    public boolean requestAdminApproval(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() == Role.ADMIN) {
+            return false;
+        }
+
+        user.setRole(Role.USER);
+        userRepository.save(user);
+        return true;
+    }
+
+    public List<UserDTO> getPendingApprovals() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole() == Role.USER)
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public boolean approveAdminRequest(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() == Role.ADMIN) {
+            return false;
+        }
+
+        user.setRole(Role.ADMIN);
+        userRepository.save(user);
+        return true;
     }
 
 }

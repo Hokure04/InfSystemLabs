@@ -1,11 +1,14 @@
 package org.example.infsyslab1.controller;
 
 import org.example.infsyslab1.dto.UserDTO;
+import org.example.infsyslab1.model.User;
 import org.example.infsyslab1.security.JWTTokenUtil;
 import org.example.infsyslab1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,5 +63,37 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id){
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/request-admin")
+    public ResponseEntity<Boolean> requestAdmin() {
+        String username = getCurrentUsername();
+        boolean success = userService.requestAdminApproval(username);
+        if (success) {
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false);
+        }
+    }
+
+    @GetMapping("/pending-approvals")
+    public ResponseEntity<List<UserDTO>> getPendingApprovals() {
+        List<UserDTO> users = userService.getPendingApprovals();
+        return ResponseEntity.ok(users);
+    }
+
+    @PostMapping("/approve-admin/{username}")
+    public ResponseEntity<Boolean> approveAdmin(@PathVariable String username) {
+        boolean success = userService.approveAdminRequest(username);
+        if (success) {
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false);
+        }
+    }
+
+    private String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 }
